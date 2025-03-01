@@ -26,7 +26,7 @@ jobs:
 
     - name: Process added files
       run: |
-        python3 process_files.py
+        python3 main.py
 
     - name: Commit and push changes to main branch
       uses: EndBug/add-and-commit@v7
