@@ -26,4 +26,14 @@ jobs:
 
     - name: Process added files
       run: |
-        python3 main.py
+        python3 process_files.py
+
+    - name: Commit and push changes to main branch
+      uses: EndBug/add-and-commit@v7
+      with:
+        author_name: 'github-actions[bot]'
+        author_email: 'github-actions[bot]@users.noreply.github.com'
+        message: 'Update levels.json file'
+        add: 'levels.json'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
