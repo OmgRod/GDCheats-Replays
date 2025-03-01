@@ -1,0 +1,29 @@
+name: Cron Task on Commit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'uploads/**'
+
+jobs:
+  process-files:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install requests Pillow
+
+    - name: Process added files
+      run: |
+        python3 main.py
