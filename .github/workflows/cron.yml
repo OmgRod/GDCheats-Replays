@@ -7,30 +7,35 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write  # This grants write permissions to the repository contents (needed for pushing to the repo)
 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Set up Git configuration
       - name: Set up Git configuration
         run: |
           git config user.name "OmgRod"
           git config user.email "89850217+OmgRod@users.noreply.github.com"
 
+      # Fetch and create/update the update-levels branch from main
       - name: Fetch and Create Branch from main
         run: |
           git fetch origin
           git checkout -b update-levels origin/main
 
+      # Modify levels.json (Example modification, you should modify this part)
       - name: Modify levels.json
         run: |
           echo '{"level": "1", "name": "Level One"}' > levels.json
           cat levels.json  # This is just to confirm the change (debugging step)
 
+      # Add the modified file and commit the changes
       - name: Commit changes to levels.json
         run: |
           git add levels.json
@@ -38,18 +43,22 @@ jobs:
           git commit -m "Update levels.json file"
           git log --oneline  # Check the last commit to ensure it's there
 
+      # Fetch remote updates for update-levels branch
       - name: Fetch remote update-levels branch
         run: |
           git fetch origin update-levels
 
+      # Merge remote update-levels into the current branch
       - name: Merge remote update-levels
         run: |
-          git merge origin/update-levels --no-edit
+          git merge origin/update-levels --allow-unrelated-histories --no-edit
 
+      # Push the changes to the update-levels branch
       - name: Push changes to update-levels
         run: |
           git push origin update-levels
 
+      # Create or update the pull request
       - name: Create or update pull request
         uses: peter-evans/create-pull-request@v7
         with:
