@@ -13,27 +13,28 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python environment
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
     - name: Install dependencies
       run: |
-        pip install requests Pillow
+        pip install -r requirements.txt
 
     - name: Process added files
       run: |
         python3 main.py
 
-    - name: Commit and push changes to main branch
-      uses: EndBug/add-and-commit@v7
+    - name: Check for changes
+      run: |
+        git diff --quiet || echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+
+    - name: Commit and push changes
+      if: env.CHANGES_DETECTED == 'true'
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        author_name: 'github-actions[bot]'
-        author_email: 'github-actions[bot]@users.noreply.github.com'
-        message: 'Update levels.json file'
-        add: 'levels.json'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: 'Update levels.json file'
+        file_pattern: 'levels.json'
