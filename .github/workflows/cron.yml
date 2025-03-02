@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write  # This grants write permissions to the repository contents (needed for pushing to the repo)
+
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
@@ -14,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up git configuration
+      # Set up Git configuration
       - name: Set up Git configuration
         run: |
           git config user.name "OmgRod"
