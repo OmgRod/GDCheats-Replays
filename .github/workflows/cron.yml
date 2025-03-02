@@ -1,54 +1,60 @@
-name: Cron Task on Commit
+name: Update Levels and Create Pull Request
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'uploads/**'
-
-permissions:  # Add these permissions to allow pushing and creating PRs
-  contents: write  # Required to push changes
-  pull-requests: write  # Required to create and manage PRs
+  workflow_dispatch:
 
 jobs:
-  process-files:
+  create-pull-request:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python environment
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      # Set up git configuration
+      - name: Set up Git configuration
+        run: |
+          git config user.name "OmgRod"
+          git config user.email "89850217+OmgRod@users.noreply.github.com"
 
-    - name: Install dependencies
-      run: |
-        pip install requests
+      # Create a new branch based on the main branch
+      - name: Create branch for changes
+        run: |
+          git fetch origin
+          git checkout -b update-levels origin/main
 
-    - name: Process added files
-      run: |
-        python3 main.py
+      # Modify levels.json file or any other necessary changes here
+      - name: Modify levels.json
+        run: |
+          # Your modification command here (e.g., echo or sed, etc.)
+          echo '{"level": "1", "name": "Level One"}' > levels.json
 
-    - name: Create Pull Request
-      id: cpr
-      uses: peter-evans/create-pull-request@v7
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # Use GITHUB_TOKEN with correct permissions
-        commit-message: "Update levels.json file"
-        branch: "update-levels"
-        delete-branch: true
-        title: "Automated Update: levels.json"
-        body: "This pull request updates the levels.json file based on new uploads."
-        labels: "automated update"
-        reviewers: "OmgRod"
+      # Add the modified file and commit the changes
+      - name: Commit changes
+        run: |
+          git add levels.json
+          git commit -m "Update levels.json file"
 
-    - name: Display PR Details
-      if: ${{ steps.cpr.outputs.pull-request-number }}
-      run: |
-        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+      # Sync the branch with the latest main to avoid conflicts
+      - name: Sync with main branch
+        run: |
+          git fetch origin
+          git merge origin/main --no-edit
+
+      # Push the changes to the update-levels branch
+      - name: Push changes to update-levels
+        run: |
+          git push origin update-levels
+
+      # Create or update the pull request
+      - name: Create or update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Update levels.json"
+          body: "This PR updates the levels.json file."
+          base: main
+          branch: update-levels
