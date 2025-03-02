@@ -23,29 +23,35 @@ jobs:
           git config user.name "OmgRod"
           git config user.email "89850217+OmgRod@users.noreply.github.com"
 
-      # Create a new branch based on the main branch
-      - name: Create branch for changes
+      # Fetch and create/update the update-levels branch from main
+      - name: Fetch and Create Branch from main
         run: |
           git fetch origin
           git checkout -b update-levels origin/main
 
-      # Modify levels.json file or any other necessary changes here
+      # Modify levels.json (Example modification, you should modify this part)
       - name: Modify levels.json
         run: |
-          # Your modification command here (e.g., echo or sed, etc.)
           echo '{"level": "1", "name": "Level One"}' > levels.json
+          cat levels.json  # This is just to confirm the change (debugging step)
 
       # Add the modified file and commit the changes
-      - name: Commit changes
+      - name: Commit changes to levels.json
         run: |
           git add levels.json
+          git status  # Check the status to see what has been added
           git commit -m "Update levels.json file"
+          git log --oneline  # Check the last commit to ensure it's there
 
-      # Sync the branch with the latest main to avoid conflicts
-      - name: Sync with main branch
+      # Fetch remote updates for update-levels branch
+      - name: Fetch remote update-levels branch
         run: |
-          git fetch origin
-          git merge origin/main --no-edit
+          git fetch origin update-levels
+
+      # Merge remote update-levels into the current branch
+      - name: Merge remote update-levels
+        run: |
+          git merge origin/update-levels --no-edit
 
       # Push the changes to the update-levels branch
       - name: Push changes to update-levels
