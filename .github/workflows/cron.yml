@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python environment
       uses: actions/setup-python@v4
@@ -22,19 +22,27 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        pip install requests Pillow
 
     - name: Process added files
       run: |
         python3 main.py
 
-    - name: Check for changes
-      run: |
-        git diff --quiet || echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-
-    - name: Commit and push changes
-      if: env.CHANGES_DETECTED == 'true'
-      uses: stefanzweifel/git-auto-commit-action@v5
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v7
       with:
-        commit_message: 'Update levels.json file'
-        file_pattern: 'levels.json'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update levels.json file"
+        branch: "update-levels"
+        delete-branch: true
+        title: "Automated Update: levels.json"
+        body: "This pull request updates the levels.json file based on new uploads."
+        labels: "automated update"
+        reviewers: "your-github-username"  # Replace with actual GitHub username
+
+    - name: Display PR Details
+      if: ${{ steps.cpr.outputs.pull-request-number }}
+      run: |
+        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
